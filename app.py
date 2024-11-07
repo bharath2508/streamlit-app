@@ -139,15 +139,24 @@ global_max_month = int(str(global_max_year_month)[4:])  # Extract month from YYY
 global_max_month_name = datetime.strptime(str(global_max_month), "%m").strftime("%B")  # Convert to month name
 
 # Clear and Apply buttons
-if st.button("Clear Filters"):
-    for key in filters.keys():
-        filters[key] = []  # Clear all selected filters
+# Initialize filters in session state
+for column in filter_columns:
+    if f"{column}_filter" not in st.session_state:
+        st.session_state[f"{column}_filter"] = []
 
-if st.button("Apply Filters"):
-    filtered_df = df.copy()
-    for column, selected_values in filters.items():
-        if selected_values:
-            filtered_df = filtered_df[filtered_df[column].isin(selected_values)]
+# Arrange top 6 filters in a 2x3 grid
+cols = st.columns(4)
+for i, column in enumerate(filter_columns):
+    with cols[i % 4]:  # Display 4 filters per row
+        options = get_filtered_options(df, filters, column)
+        selected_values = st.multiselect(f"Select {column}", options, key=f"{column}_filter")
+        filters[column] = selected_values if selected_values else options
+
+# Clear and Apply buttons
+if st.button("Clear Filters"):
+    for column in filter_columns:
+        st.session_state[f"{column}_filter"] = []  # Reset each filter in session state
+
     
     # YTD Rep Spend and monthly spend calculation using global max month
     ytd_rep_spend = round(filtered_df['Rep Spend'].sum())  # Round to integer for display
