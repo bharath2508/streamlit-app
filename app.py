@@ -4,7 +4,7 @@ from datetime import datetime
 import os
 
 # Path to your Excel file
-excel_file_path = r"C:\Users\INBHCHA9\Downloads\Simulator Rules_v02.xlsx"
+excel_file_path = "Simulator Rules_v02.xlsx"
 
 # Load Excel data
 file_path = 'data.xlsx'  # Path to your Excel file
