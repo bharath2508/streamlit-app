@@ -68,13 +68,25 @@ st.markdown("<h1 class='header'>PAMA - Cost and Budget Simulator for Budget Prep
 # Displaying all values in USD note
 st.markdown("<p class='note'>Note : All the values are in USD</p>", unsafe_allow_html=True)
 
-# Initialize clear filters flag in session state if not set
+# Initialize the clear filters flag in session state if not set
 if "clear_filters" not in st.session_state:
     st.session_state.clear_filters = False
 
-# Function to reset filters
-def reset_filters():
-    st.session_state.clear_filters = True
+# Function to reset both the Filter Box filters and Input Parameters
+def reset_all_filters():
+    # Reset Filter Box filters
+    for column in filter_columns:
+        st.session_state[f"{column}_filter"] = []
+    
+    # Reset Input Parameters
+    st.session_state["spend_change"] = 0.0
+    st.session_state["price_change"] = 0.0
+    st.session_state["selected_year_spend"] = datetime.now().year
+    st.session_state["selected_month_spend"] = f"{datetime.now().month:02d}"
+    st.session_state["selected_year_price"] = datetime.now().year
+    st.session_state["selected_month_price"] = f"{datetime.now().month:02d}"
+
+    st.session_state.clear_filters = False  # Reset the flag after clearing
 
 # Header for filters section
 st.header("Filters Box")
@@ -90,14 +102,6 @@ filters = {
     "MDF": []
 }
 
-# Function to dynamically filter options based on selected values
-def get_filtered_options(df, filters, selected_column):
-    filtered_df = df.copy()
-    for column, selected_values in filters.items():
-        if selected_values and column != selected_column:
-            filtered_df = filtered_df[filtered_df[column].isin(selected_values)]
-    return filtered_df[selected_column].dropna().unique().tolist()
-
 # Filter columns and initialize filters in session state
 filter_columns = list(filters.keys())
 for column in filter_columns:
@@ -106,11 +110,15 @@ for column in filter_columns:
 
 # Check if the clear_filters flag is set
 if st.session_state.clear_filters:
-    # Reset each filter in session state to an empty list
-    for column in filter_columns:
-        st.session_state[f"{column}_filter"] = []
-    # Reset the flag
-    st.session_state.clear_filters = False
+    reset_all_filters()
+
+# Function to dynamically filter options based on selected values
+def get_filtered_options(df, filters, selected_column):
+    filtered_df = df.copy()
+    for column, selected_values in filters.items():
+        if selected_values and column != selected_column:
+            filtered_df = filtered_df[filtered_df[column].isin(selected_values)]
+    return filtered_df[selected_column].dropna().unique().tolist()
 
 # Arrange top 6 filters in a 2x3 grid
 cols = st.columns(4)
@@ -128,11 +136,11 @@ input_cols = st.columns(4)
 
 # Spend change
 with input_cols[0]:
-    spend_change = st.number_input("Spend change (%)", value=0.0)
+    spend_change = st.number_input("Spend change (%)", value=0.0, key="spend_change")
 
 # Price change
 with input_cols[1]:
-    price_change = st.number_input("Price change (%)", value=0.0) / 100  # Convert to decimal
+    price_change = st.number_input("Price change (%)", value=0.0, key="price_change") / 100  # Convert to decimal
 
 # Year and month selection for spend and price change start dates
 current_year = datetime.now().year
@@ -141,13 +149,13 @@ months = [f"{month:02d}" for month in range(1, 13)]
 
 # Start date for spend change (year and month only)
 with input_cols[2]:
-    selected_year_spend = st.selectbox("Start date spend change - Year", years)
-    selected_month_spend = st.selectbox("Start date spend change - Month", months, index=datetime.now().month - 1)
+    selected_year_spend = st.selectbox("Start date spend change - Year", years, key="selected_year_spend")
+    selected_month_spend = st.selectbox("Start date spend change - Month", months, index=datetime.now().month - 1, key="selected_month_spend")
 
 # Start date for price change (year and month only)
 with input_cols[3]:
-    selected_year_price = st.selectbox("Start date price change - Year", years)
-    selected_month_price = st.selectbox("Start date price change - Month", months, index=datetime.now().month - 1)
+    selected_year_price = st.selectbox("Start date price change - Year", years, key="selected_year_price")
+    selected_month_price = st.selectbox("Start date price change - Month", months, index=datetime.now().month - 1, key="selected_month_price")
 
 # Combine selected year and month into YYYYMM format for any calculations or display purposes
 start_date_spend_change = f"{selected_year_spend}{selected_month_spend}"
@@ -160,7 +168,7 @@ global_max_month_name = datetime.strptime(str(global_max_month), "%m").strftime(
 
 # Clear and Apply buttons
 if st.button("Clear Filters"):
-    reset_filters()  # Call the reset function to clear filters
+    st.session_state.clear_filters = True  # Set the flag to trigger filter reset
 
 if st.button("Apply Filters"):
     filtered_df = df.copy()
