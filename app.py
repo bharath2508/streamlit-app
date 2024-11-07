@@ -15,6 +15,14 @@ file_path = 'data.xlsx'  # Path to your Excel file
 sheet_name = 'data'  # Replace with your sheet name
 df = pd.read_excel(file_path, sheet_name=sheet_name)
 
+with open(excel_file_path, "rb") as file:
+    st.download_button(
+        label="📂 Click Here to Download Reference File with Rules for this Simulator",
+        data=file,
+        file_name="Simulator Rules_v02.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+
 # Ensure 'Year Month' and 'Product Group' are integers for calculations
 df['Year Month'] = df['Year Month'].fillna(0).astype(int)
 df['Product Group'] = df['Product Group'].fillna(0).astype(int)
@@ -59,15 +67,6 @@ st.markdown("<h1 class='header'>PAMA - Cost and Budget Simulator for Budget Prep
 
 # Displaying all values in USD note
 st.markdown("<p class='note'>Note : All the values are in USD</p>", unsafe_allow_html=True)
-
-with open(excel_file_path, "rb") as file:
-    st.download_button(
-        label="📂 Click Here to Download Reference File with Rules for this Simulator",
-        data=file,
-        file_name="Simulator Rules_v02.xlsx",
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
-    st.stop()
 
 # Header for filters section
 st.header("Filters Box")
