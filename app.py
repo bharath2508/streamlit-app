@@ -6,7 +6,7 @@ import os
 @st.cache_data
 def load_excel_data(file_path, sheet_name):
     return pd.read_excel(file_path, sheet_name=sheet_name)
-    
+
 # Path to your Excel file
 excel_file_path = "Simulator Rules_v02.xlsx"
 
@@ -113,27 +113,20 @@ if st.session_state.clear_filters:
     reset_all_filters()
 
 # Function to dynamically filter options based on all selected values
-def get_filtered_data(df, filters):
-    # Filter the DataFrame based on all selected filters
+def get_filtered_options(df, active_filters, target_column):
     filtered_df = df.copy()
-    for column, selected_values in filters.items():
-        if selected_values:
+    # Apply all active filters except for the target column
+    for column, selected_values in active_filters.items():
+        if column != target_column and selected_values:
             filtered_df = filtered_df[filtered_df[column].isin(selected_values)]
-    return filtered_df
+    return filtered_df[target_column].dropna().unique().tolist()
 
-# Arrange top 6 filters in a 2x3 grid
-cols = st.columns(4)
-updated_filters = {}
-
-for i, column in enumerate(filter_columns):
-    with cols[i % 4]:  # Display 4 filters per row
-        filtered_data = get_filtered_data(df, filters)
-        options = filtered_data[column].dropna().unique().tolist()
-        selected_values = st.multiselect(f"Select {column}", options, key=f"{column}_filter")
-        updated_filters[column] = selected_values if selected_values else options
-
-# Update the filters with the current selections for dynamic slicing
-filters.update(updated_filters)
+# Dynamic filter selection
+for column in filter_columns:
+    # Use the get_filtered_options to dynamically update based on other filters
+    options = get_filtered_options(df, filters, column)
+    selected_values = st.multiselect(f"Select {column}", options, key=f"{column}_filter")
+    filters[column] = selected_values if selected_values else options
 
 # Divider for input parameters
 st.header("Input Parameters")
@@ -178,7 +171,10 @@ if st.button("Clear Filters"):
     st.session_state.clear_filters = True  # Set the flag to trigger filter reset
 
 if st.button("Apply Filters"):
-    filtered_df = get_filtered_data(df, filters)
+    filtered_df = df.copy()
+    for column, selected_values in filters.items():
+        if selected_values:
+            filtered_df = filtered_df[filtered_df[column].isin(selected_values)]
     
     # YTD Rep Spend and monthly spend calculation using global max month
     ytd_rep_spend = round(filtered_df['Rep Spend'].sum())  # Round to integer for display
