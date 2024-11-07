@@ -56,11 +56,13 @@ st.markdown("<h1 class='header'>PAMA - Cost and Budget Simulator for Budget Prep
 # Displaying all values in USD note
 st.markdown("<p class='note'>Note : All the values are in USD</p>", unsafe_allow_html=True)
 
-if st.button("📂 Click Here to Open Reference File with rules for this Simulator"):
-    try:
-        os.startfile(excel_file_path)
-    except Exception as e:
-        st.error(f"An error occurred: {e}")
+with open(excel_file_path, "rb") as file:
+    st.download_button(
+        label="📂 Click Here to Download Reference File with Rules for this Simulator",
+        data=file,
+        file_name="Simulator Rules_v02.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
 
 # Header for filters section
 st.header("Filters Box")
