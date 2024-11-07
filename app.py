@@ -113,22 +113,27 @@ if st.session_state.clear_filters:
     reset_all_filters()
 
 # Function to dynamically filter options based on all selected values
-def get_filtered_options(df, filters, selected_column):
-    # Filter the DataFrame based on all other selected filters
+def get_filtered_data(df, filters):
+    # Filter the DataFrame based on all selected filters
     filtered_df = df.copy()
     for column, selected_values in filters.items():
         if selected_values:
             filtered_df = filtered_df[filtered_df[column].isin(selected_values)]
-    # Return unique options for the specific column after applying all other filters
-    return filtered_df[selected_column].dropna().unique().tolist()
+    return filtered_df
 
 # Arrange top 6 filters in a 2x3 grid
 cols = st.columns(4)
+updated_filters = {}
+
 for i, column in enumerate(filter_columns):
     with cols[i % 4]:  # Display 4 filters per row
-        options = get_filtered_options(df, filters, column)
+        filtered_data = get_filtered_data(df, filters)
+        options = filtered_data[column].dropna().unique().tolist()
         selected_values = st.multiselect(f"Select {column}", options, key=f"{column}_filter")
-        filters[column] = selected_values if selected_values else options
+        updated_filters[column] = selected_values if selected_values else options
+
+# Update the filters with the current selections for dynamic slicing
+filters.update(updated_filters)
 
 # Divider for input parameters
 st.header("Input Parameters")
@@ -173,10 +178,7 @@ if st.button("Clear Filters"):
     st.session_state.clear_filters = True  # Set the flag to trigger filter reset
 
 if st.button("Apply Filters"):
-    filtered_df = df.copy()
-    for column, selected_values in filters.items():
-        if selected_values:
-            filtered_df = filtered_df[filtered_df[column].isin(selected_values)]
+    filtered_df = get_filtered_data(df, filters)
     
     # YTD Rep Spend and monthly spend calculation using global max month
     ytd_rep_spend = round(filtered_df['Rep Spend'].sum())  # Round to integer for display
