@@ -112,12 +112,14 @@ for column in filter_columns:
 if st.session_state.clear_filters:
     reset_all_filters()
 
-# Function to dynamically filter options based on selected values
+# Function to dynamically filter options based on all selected values
 def get_filtered_options(df, filters, selected_column):
+    # Filter the DataFrame based on all other selected filters
     filtered_df = df.copy()
     for column, selected_values in filters.items():
-        if selected_values and column != selected_column:
+        if selected_values:
             filtered_df = filtered_df[filtered_df[column].isin(selected_values)]
+    # Return unique options for the specific column after applying all other filters
     return filtered_df[selected_column].dropna().unique().tolist()
 
 # Arrange top 6 filters in a 2x3 grid
