@@ -5,7 +5,7 @@ import os
 
 @st.cache_data
 def load_excel_data(file_path, sheet_name):
-    return pd.read_excel(file_path, sheet_name=sheet_name)
+    return pd.load_excel_data(file_path, sheet_name=sheet_name)
     
 # Path to your Excel file
 excel_file_path = "Simulator Rules_v02.xlsx"
