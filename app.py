@@ -121,12 +121,14 @@ def get_filtered_options(df, active_filters, target_column):
             filtered_df = filtered_df[filtered_df[column].isin(selected_values)]
     return filtered_df[target_column].dropna().unique().tolist()
 
-# Dynamic filter selection
-for column in filter_columns:
-    # Use the get_filtered_options to dynamically update based on other filters
-    options = get_filtered_options(df, filters, column)
-    selected_values = st.multiselect(f"Select {column}", options, key=f"{column}_filter")
-    filters[column] = selected_values if selected_values else options
+# Arrange filters in a 4-column layout and update dynamically based on selections
+cols = st.columns(4)
+for i, column in enumerate(filter_columns):
+    with cols[i % 4]:  # Display 4 filters per row
+        # Dynamically get the filtered options based on current filter selections
+        options = get_filtered_options(df, filters, column)
+        selected_values = st.multiselect(f"Select {column}", options, key=f"{column}_filter")
+        filters[column] = selected_values if selected_values else options
 
 # Divider for input parameters
 st.header("Input Parameters")
