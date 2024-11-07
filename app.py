@@ -13,7 +13,7 @@ excel_file_path = "Simulator Rules_v02.xlsx"
 # Load Excel data
 file_path = 'data.xlsx'  # Path to your Excel file
 sheet_name = 'data'  # Replace with your sheet name
-df = pd.read_excel(file_path, sheet_name=sheet_name)
+df = pd.load_excel_data(file_path, sheet_name=sheet_name)
 
 with open(excel_file_path, "rb") as file:
     st.download_button(
