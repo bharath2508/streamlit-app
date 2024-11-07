@@ -68,6 +68,14 @@ st.markdown("<h1 class='header'>PAMA - Cost and Budget Simulator for Budget Prep
 # Displaying all values in USD note
 st.markdown("<p class='note'>Note : All the values are in USD</p>", unsafe_allow_html=True)
 
+# Initialize clear filters flag in session state if not set
+if "clear_filters" not in st.session_state:
+    st.session_state.clear_filters = False
+
+# Function to reset filters
+def reset_filters():
+    st.session_state.clear_filters = True
+
 # Header for filters section
 st.header("Filters Box")
 
@@ -96,10 +104,13 @@ for column in filter_columns:
     if f"{column}_filter" not in st.session_state:
         st.session_state[f"{column}_filter"] = []
 
-# Function to reset filters in session state
-def reset_filters():
+# Check if the clear_filters flag is set
+if st.session_state.clear_filters:
+    # Reset each filter in session state to an empty list
     for column in filter_columns:
         st.session_state[f"{column}_filter"] = []
+    # Reset the flag
+    st.session_state.clear_filters = False
 
 # Arrange top 6 filters in a 2x3 grid
 cols = st.columns(4)
