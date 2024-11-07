@@ -63,6 +63,7 @@ with open(excel_file_path, "rb") as file:
         file_name="Simulator Rules_v02.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
+    st.stop()
 
 # Header for filters section
 st.header("Filters Box")
