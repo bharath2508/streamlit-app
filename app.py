@@ -96,6 +96,11 @@ for column in filter_columns:
     if f"{column}_filter" not in st.session_state:
         st.session_state[f"{column}_filter"] = []
 
+# Function to reset filters in session state
+def reset_filters():
+    for column in filter_columns:
+        st.session_state[f"{column}_filter"] = []
+
 # Arrange top 6 filters in a 2x3 grid
 cols = st.columns(4)
 for i, column in enumerate(filter_columns):
@@ -144,8 +149,7 @@ global_max_month_name = datetime.strptime(str(global_max_month), "%m").strftime(
 
 # Clear and Apply buttons
 if st.button("Clear Filters"):
-    for column in filter_columns:
-        st.session_state[f"{column}_filter"] = []  # Reset each filter in session state
+    reset_filters()  # Call the reset function to clear filters
 
 if st.button("Apply Filters"):
     filtered_df = df.copy()
