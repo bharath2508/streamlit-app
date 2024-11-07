@@ -90,14 +90,18 @@ def get_filtered_options(df, filters, selected_column):
             filtered_df = filtered_df[filtered_df[column].isin(selected_values)]
     return filtered_df[selected_column].dropna().unique().tolist()
 
+# Filter columns and initialize filters in session state
+filter_columns = list(filters.keys())
+for column in filter_columns:
+    if f"{column}_filter" not in st.session_state:
+        st.session_state[f"{column}_filter"] = []
+
 # Arrange top 6 filters in a 2x3 grid
 cols = st.columns(4)
-filter_columns = list(filters.keys())
-
 for i, column in enumerate(filter_columns):
     with cols[i % 4]:  # Display 4 filters per row
         options = get_filtered_options(df, filters, column)
-        selected_values = st.multiselect(f"Select {column}", options)
+        selected_values = st.multiselect(f"Select {column}", options, key=f"{column}_filter")
         filters[column] = selected_values if selected_values else options
 
 # Divider for input parameters
@@ -139,24 +143,15 @@ global_max_month = int(str(global_max_year_month)[4:])  # Extract month from YYY
 global_max_month_name = datetime.strptime(str(global_max_month), "%m").strftime("%B")  # Convert to month name
 
 # Clear and Apply buttons
-# Initialize filters in session state
-for column in filter_columns:
-    if f"{column}_filter" not in st.session_state:
-        st.session_state[f"{column}_filter"] = []
-
-# Arrange top 6 filters in a 2x3 grid
-cols = st.columns(4)
-for i, column in enumerate(filter_columns):
-    with cols[i % 4]:  # Display 4 filters per row
-        options = get_filtered_options(df, filters, column)
-        selected_values = st.multiselect(f"Select {column}", options, key=f"{column}_filter")
-        filters[column] = selected_values if selected_values else options
-
-# Clear and Apply buttons
 if st.button("Clear Filters"):
     for column in filter_columns:
         st.session_state[f"{column}_filter"] = []  # Reset each filter in session state
 
+if st.button("Apply Filters"):
+    filtered_df = df.copy()
+    for column, selected_values in filters.items():
+        if selected_values:
+            filtered_df = filtered_df[filtered_df[column].isin(selected_values)]
     
     # YTD Rep Spend and monthly spend calculation using global max month
     ytd_rep_spend = round(filtered_df['Rep Spend'].sum())  # Round to integer for display
@@ -193,7 +188,6 @@ if st.button("Clear Filters"):
     
     for col in financial_columns:
         available_data_df[col] = available_data_df[col].apply(lambda x: f"{int(x):,}" if pd.notnull(x) and isinstance(x, (int, float)) else x)
-
 
     st.markdown("<div class='full-width-table'>", unsafe_allow_html=True)
     st.table(available_data_df.reset_index(drop=True))
