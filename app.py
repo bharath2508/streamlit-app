@@ -177,7 +177,8 @@ if st.button("Apply Filters"):
     ]
     
     for col in financial_columns:
-        available_data_df[col] = available_data_df[col].apply(lambda x: f"{int(x):,}" if isinstance(x, (int, float)) else x)
+        available_data_df[col] = available_data_df[col].apply(lambda x: f"{int(x):,}" if pd.notnull(x) and isinstance(x, (int, float)) else x)
+
 
     st.markdown("<div class='full-width-table'>", unsafe_allow_html=True)
     st.table(available_data_df.reset_index(drop=True))
